@@ -29,13 +29,17 @@ The rule tests used the configured shared UID. The browser tests used a
 temporary emulator account and substituted its UID in the emulator's
 rules and browser configuration; production files were not changed.
 
-Still to verify manually:
+User-confirmed live check (October 26, 2026):
 
-1. Sign in on the published site with the real family password. The code
-   assumes the shared account email is `family@example.com`.
-2. Choose Steve, save a note, and reload.
-3. Open the link on a second phone/browser, choose a different person,
-   and confirm changes appear on both devices.
+Steve opened the app on his computer, added a test note, and then opened
+it successfully on his phone. This confirms the live shared login and
+cross-device data flow. The phone model and browser were not recorded.
 
-Real iPhone/Android keyboards, Safari behavior, and the live shared
-account's authenticated access have not been tested by the automated run.
+Optional follow-up checks:
+
+1. Save from the phone while the computer's board stays open, and confirm
+   the note updates without reloading.
+2. Try the remaining family members' phones when sharing the link.
+
+The automated run did not test physical iPhone/Android devices or Safari;
+the successful phone check above was performed by Steve.
