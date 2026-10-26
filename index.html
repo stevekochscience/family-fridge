@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <meta name="description" content="Four little notes. One family fridge.">
+  <title>Family Fridge</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📝%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header><p class="eyebrow">THE KOCH FAMILY BULLETIN BOARD</p><h1>Family Fridge<span aria-hidden="true">✳</span></h1><p class="subtitle">Four little notes. Zero group-chat chaos.</p></header>
+    <p id="boot" role="status">Opening the fridge…</p>
+    <section id="login" class="welcome" hidden aria-labelledby="welcome-title">
+      <span class="magnet" aria-hidden="true">✳</span><p class="eyebrow">COME ON IN</p><h2 id="welcome-title">Got the fridge password?</h2><p>A little place to leave a little something.</p>
+      <form id="login-form"><label for="password">Family password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button id="unlock" type="submit">Open the fridge <span aria-hidden="true">→</span></button></form>
+      <p id="login-status" class="feedback" role="status"></p>
+    </section>
+    <section id="choose" class="welcome" hidden aria-labelledby="choose-title"><p class="eyebrow">PICK YOUR CORNER</p><h2 id="choose-title">Who’s leaving a note?</h2><p>Everyone can read. Your corner is yours to edit.</p><div id="names" class="names"></div></section>
+    <section id="board" hidden aria-label="Family messages">
+      <div class="toolbar"><div><span id="identity"></span><span id="connection" role="status">Connecting…</span></div><button id="change" class="quiet">Switch name</button></div>
+      <div id="notes" class="notes"></div>
+      <p id="board-status" class="feedback" role="status"></p>
+    </section>
+    <footer><span>Less scrolling. More fridge.</span><button id="logout" class="quiet" hidden>Sign out</button></footer>
+    <noscript>This fridge needs JavaScript enabled to sign in and share notes.</noscript>
+  </main>
+  <script type="module">
+    import('./app.js').catch(() => { document.querySelector('#boot').textContent = 'The fridge couldn’t load. Check your connection and reload this page.'; });
+  </script>
+</body>
+</html>
