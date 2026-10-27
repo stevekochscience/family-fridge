@@ -1,4 +1,5 @@
 import * as backend from './backend.js';
+import { createReactions } from './reactions.js';
 import { sharedUid } from './config.js';
 
 const people = [['sam', 'Sammy'], ['grace', 'Gracie'], ['lisa', 'Lisa'], ['steve', 'Steve'], ['marshall', 'Marshall']];
@@ -9,6 +10,7 @@ if (!people.some(([id]) => id === chosen)) chosen = '';
 let notes = {}, editing = '', saving = false, connected = false, ready = false;
 let stopNotes = () => {}, stopConnection = () => {};
 const cards = new Map();
+const reactionsUI = createReactions({ people, backend, getState: () => ({ notes, chosen, ready, connected, saving }) });
 
 function show(id) {
   for (const section of ['login', 'choose', 'board']) $(`#${section}`).hidden = section !== id;
@@ -58,7 +60,7 @@ for (const [id, name] of people) {
       card.querySelector('.note-status').textContent = 'Couldn’t save. Your draft is still here—try again.';
     } finally { clearTimeout(slow); saving = false; render(); if (!editing) card.querySelector('.edit').focus(); }
   });
-  $('#notes').append(card); cards.set(id, card);
+  $('#notes').append(card); cards.set(id, card); reactionsUI.attach(card, id);
 }
 function render() {
   for (const [id, card] of cards) {
@@ -74,6 +76,7 @@ function render() {
     const stamp = card.querySelector('.timestamp');
     stamp.textContent = note?.updatedAt ? `Updated ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(note.updatedAt))}` : id === 'marshall' ? 'Very good boy. Very important note.' : 'A little space for you.';
   }
+  reactionsUI.render();
   $('#change').disabled = saving; $('#logout').disabled = saving;
 }
 $('#login-form').addEventListener('submit', async event => {
@@ -90,9 +93,9 @@ $('#logout').addEventListener('click', async () => {
   if (editing && !confirm('Discard your unsaved note and sign out?')) return;
   try { await backend.logout(); } catch { $('#board-status').textContent = 'Couldn’t sign out. Check your connection and try again.'; }
 });
-window.addEventListener('beforeunload', event => { if (editing || saving) { event.preventDefault(); event.returnValue = ''; } });
+window.addEventListener('beforeunload', event => { if (editing || saving || reactionsUI.isPending()) { event.preventDefault(); event.returnValue = ''; } });
 backend.watchAuth(user => {
-  stopNotes(); stopConnection(); notes = {}; ready = false; connected = false; editing = ''; render();
+  stopNotes(); stopConnection(); reactionsUI.reset(); notes = {}; ready = false; connected = false; editing = ''; render();
   $('#boot').hidden = true; $('#board-status').textContent = '';
   $('#logout').hidden = !user;
   if (!user || user.uid !== sharedUid) {
@@ -101,8 +104,9 @@ backend.watchAuth(user => {
     return;
   }
   if (chosen) selectPerson(chosen); else show('choose');
+  reactionsUI.listen();
   stopConnection = backend.watchConnection(value => {
-    connected = value;
+    connected = value; reactionsUI.render();
     $('#connection').textContent = value ? '● Connected · updates arrive automatically' : '○ Reconnecting · notes may be out of date';
   });
   stopNotes = backend.watchNotes(value => { notes = value; ready = true; $('#board-status').textContent = ''; render(); }, () => {

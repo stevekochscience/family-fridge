@@ -12,3 +12,6 @@ export const logout = () => signOut(auth);
 export const watchNotes = (callback, failure) => onValue(ref(db, 'messages'), snapshot => callback(snapshot.val() || {}), failure);
 export const watchConnection = callback => onValue(ref(db, '.info/connected'), snapshot => callback(snapshot.val() === true));
 export const saveNote = (person, text) => set(ref(db, `messages/${person}`), { text, updatedAt: serverTimestamp() });
+
+export const watchReactions = (callback, failure) => onValue(ref(db, 'reactions'), snapshot => callback(snapshot.val() || {}), failure);
+export const saveReaction = (note, person, value) => set(ref(db, `reactions/${note}/${person}`), value);

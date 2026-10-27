@@ -19,6 +19,19 @@ Drafts are not saved across reloads. If a save is waiting for the server,
 keep the page open until it says **Saved**. Two people editing the same
 panel follow last-save-wins behavior; different panels save independently.
 
+## Reactions
+
+Open **React** under a saved note and choose ❤️, 😂, 👍, 😮, 🤗, or 🐾.
+Each selected person gets one reaction per note. Choose another emoji to
+change it, or tap your selected emoji again to remove it. Tap an existing
+emoji/count badge to see who reacted. Your reaction has a dark outline.
+Reactions update automatically and are attached to the current note;
+saving a replacement note starts fresh. Unsaved placeholder notes have
+no reactions. Names remain on the same family honor system as editing.
+
+Publish the full updated `database.rules.json` in Firebase Console before
+using reactions. GitHub Pages deployment does not publish Firebase rules.
+
 ## How it works
 
 GitHub Pages serves plain HTML, CSS, and JavaScript. There is no build step.
@@ -27,6 +40,10 @@ have system-font fallbacks. Firebase Authentication uses one shared
 email/password account. Realtime Database holds one object per person at
 `messages/sam`, `messages/grace`, `messages/lisa`, `messages/steve`, and `messages/marshall`.
 Each object has `text` and a server-generated `updatedAt` timestamp.
+Reactions live separately at `reactions/{note}/{person}`, with an allowed
+emoji key and the note timestamp they refer to. This avoids overwriting
+other people’s reactions or the message when saving. Old reactions are
+hidden after a new note is saved, with at most one stored entry per pair.
 
 The source and `config.js` are public, including the Firebase API key,
 shared email, and UID. These are client configuration, not administrator
@@ -80,4 +97,3 @@ configure Firebase emulators. Avoid overwriting real notes during tests.
 
 See `TESTING.md` for the prototype's tested behavior and remaining
 real-device checks.
-

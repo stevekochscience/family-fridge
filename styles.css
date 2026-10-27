@@ -13,3 +13,20 @@
 .marshall .message{color:#624b38;margin:16px 0 22px}
 .marshall .edit{background:#fff8ea;border-color:#bca88f}
 @media(max-width:520px){.note.marshall{min-height:220px;padding:23px 18px 15px}.dog-ribbon{font-size:9px;letter-spacing:1.5px}}
+
+.reactions{border-top:1px solid #28372e25;margin-top:8px;padding-top:10px}
+.reaction-list{display:flex;gap:5px;flex-wrap:wrap}
+.reaction-chip{min-width:48px;min-height:44px;padding:6px 10px;background:#ffffff80;border:1px solid #28372e30;color:#28372e;font-size:15px;font-weight:500}
+.reaction-chip.mine{border:2px solid #385c43;background:#fffef2}
+.reaction-picker{margin-top:6px}
+.reaction-picker summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;width:fit-content;padding:8px 4px;list-style:none;text-decoration:underline;text-underline-offset:4px}
+.reaction-picker summary::-webkit-details-marker{display:none}
+.reaction-picker summary:focus-visible{outline:3px solid #246fc2;outline-offset:2px}
+.emoji-options{display:flex;flex-wrap:wrap;gap:5px}
+.emoji-option{min-height:44px;width:44px;padding:5px;font-size:23px;background:#ffffff80;border:1px solid #28372e30;color:#28372e}
+.emoji-option[aria-pressed=true]{border:2px solid #385c43;background:#fffef2}
+.reaction-hint,.reaction-status{font-size:11px;line-height:1.4;margin:7px 0 0;color:#344538}
+.reaction-status:empty{display:none}
+.reaction-dialog{max-width:min(360px,calc(100vw - 32px));width:100%;border:1px solid #b5b5a5;border-radius:16px;padding:26px;background:#fffdf5;color:#28372e;box-shadow:0 15px 70px #0003}
+.reaction-dialog::backdrop{background:#25382bc0}
+.reaction-dialog h2{font-size:27px;margin:0 0 16px}.reaction-names{line-height:1.7;overflow-wrap:anywhere;margin-bottom:22px}.reaction-dialog button{width:100%}

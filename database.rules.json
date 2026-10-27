@@ -7,9 +7,33 @@
       "$person": {
         ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall') && newData.exists()",
         ".validate": "newData.hasChildren(['text', 'updatedAt'])",
-        "text": { ".validate": "newData.isString() && newData.val().length <= 280" },
-        "updatedAt": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now" },
-        "$other": { ".validate": false }
+        "text": {
+          ".validate": "newData.isString() && newData.val().length <= 280"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "reactions": {
+      ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3'",
+      "$note": {
+        "$person": {
+          ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($note === 'sam' || $note === 'grace' || $note === 'lisa' || $note === 'steve' || $note === 'marshall') && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall')",
+          ".validate": "newData.hasChildren(['emoji', 'noteUpdatedAt']) && root.child('messages').child($note).child('text').isString() && root.child('messages').child($note).child('text').val().length > 0",
+          "emoji": {
+            ".validate": "newData.isString() && (newData.val() === 'heart' || newData.val() === 'laugh' || newData.val() === 'like' || newData.val() === 'wow' || newData.val() === 'hug' || newData.val() === 'paw')"
+          },
+          "noteUpdatedAt": {
+            ".validate": "newData.isNumber() && newData.val() === root.child('messages').child($note).child('updatedAt').val()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
       }
     }
   }

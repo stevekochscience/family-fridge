@@ -52,3 +52,19 @@ At 320, 390, and 1280px, his full-width note sits below the human 2 x 2
 grid without horizontal overflow. No uncaught browser errors occurred.
 The expanded production database rule still needs publishing in Firebase.
 
+
+## Emoji reactions
+
+Reaction UI checks use an isolated simulated backend, not live family data.
+The expanded rules require publication in Firebase Console. Their JSON
+structure was reviewed; this change was not run through the Firebase
+emulator because its launcher was previously blocked by application control.
+Live authenticated reaction saves still require a family check after rules
+are published.
+
+Browser checks passed with the simulated backend: simultaneous reactions
+from two viewers, name popup, changing/removing only one's own reaction,
+reload persistence, Marshall attribution, reaction reset after note
+replacement, offline controls, denied-write feedback, and missing-rule
+feedback that leaves note editing usable. Layout checks passed at 320,
+390, and 1280px; no uncaught browser errors occurred.
