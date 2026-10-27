@@ -29,8 +29,8 @@ Reactions update automatically and are attached to the current note;
 saving a replacement note starts fresh. Unsaved placeholder notes have
 no reactions. Names remain on the same family honor system as editing.
 
-Publish the full updated `database.rules.json` in Firebase Console before
-using reactions. GitHub Pages deployment does not publish Firebase rules.
+The reaction rules are published. Future rule changes can be deployed with
+the Firebase CLI command below. GitHub Pages does not publish Firebase rules.
 
 ## How it works
 
@@ -80,6 +80,26 @@ enable billing just to follow this README.
   those explicitly in Firebase Console and keep the repository copy in sync.
 - Push site changes to `main`; GitHub Pages publishes from the root of
   that branch. Check repository Settings → Pages for deployment status.
+
+## Deploy database rules
+
+Firebase CLI is configured by `firebase.json` and `.firebaserc`.
+From this repository, after signing in with `firebase login`, run:
+
+```sh
+firebase deploy --only database --project family-fridge-db4c3
+```
+
+On this Windows computer, if `firebase` is not on PATH, use PowerShell:
+
+```powershell
+& "$env:APPDATA\npm\firebase.cmd" deploy --only database --project family-fridge-db4c3
+```
+
+This deploys `database.rules.json` without changing the stored notes or
+reactions. It replaces the live rules, so compare any console edits first.
+CLI credentials stay outside the repository. Use the explicit project ID
+to avoid deploying to a different Firebase project. No billing is required.
 
 ## Run locally
 

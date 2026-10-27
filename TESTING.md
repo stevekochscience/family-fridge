@@ -68,3 +68,13 @@ reload persistence, Marshall attribution, reaction reset after note
 replacement, offline controls, denied-write feedback, and missing-rule
 feedback that leaves note editing usable. Layout checks passed at 320,
 390, and 1280px; no uncaught browser errors occurred.
+
+## Firebase CLI deployment — October 27, 2026
+
+Firebase CLI 15.34.1 authenticated successfully and listed the expected
+project and database instance. Published rules were backed up and matched
+the repository, including reactions. A rules-only deployment explicitly
+targeting family-fridge-db4c3 passed Firebase's syntax check and completed
+successfully. Stored messages and reactions were not modified. This proves
+deployment access and rule publication; it is not an authenticated browser
+reaction-save test.
