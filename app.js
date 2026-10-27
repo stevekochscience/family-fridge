@@ -1,6 +1,7 @@
-import * as backend from './backend.js';
-import { createReactions } from './reactions.js';
+import * as backend from './backend.js?v=history-1';
+import { createReactions } from './reactions.js?v=history-1';
 import { sharedUid } from './config.js';
+import { createHistory } from './history.js?v=history-1';
 
 const people = [['sam', 'Sammy'], ['grace', 'Gracie'], ['lisa', 'Lisa'], ['steve', 'Steve'], ['marshall', 'Marshall']];
 const $ = selector => document.querySelector(selector);
@@ -10,7 +11,9 @@ if (!people.some(([id]) => id === chosen)) chosen = '';
 let notes = {}, editing = '', saving = false, connected = false, ready = false;
 let stopNotes = () => {}, stopConnection = () => {};
 const cards = new Map();
-const reactionsUI = createReactions({ people, backend, getState: () => ({ notes, chosen, ready, connected, saving }) });
+const historyUI = createHistory({ backend, getState: () => ({ notes, ready, connected, editing, saving }), onChange: () => render() });
+const visibleNotes = () => Object.fromEntries(people.map(([id]) => [id, historyUI.view(id)]));
+const reactionsUI = createReactions({ people, backend, getState: () => ({ notes: visibleNotes(), chosen, ready, connected, saving }) });
 
 function show(id) {
   for (const section of ['login', 'choose', 'board']) $(`#${section}`).hidden = section !== id;
@@ -55,28 +58,29 @@ for (const [id, name] of people) {
     const slow = setTimeout(() => { if (saving) card.querySelector('.note-status').textContent = 'Still waiting for the server. Keep this page open.'; }, 8000);
     try {
       await backend.saveNote(id, textarea.value);
-      editing = ''; card.querySelector('.note-status').textContent = 'Saved ✓';
+      editing = ''; historyUI.latest(id); card.querySelector('.note-status').textContent = 'Saved ✓';
     } catch {
       card.querySelector('.note-status').textContent = 'Couldn’t save. Your draft is still here—try again.';
     } finally { clearTimeout(slow); saving = false; render(); if (!editing) card.querySelector('.edit').focus(); }
   });
-  $('#notes').append(card); cards.set(id, card); reactionsUI.attach(card, id);
+  $('#notes').append(card); cards.set(id, card); historyUI.attach(card, id); reactionsUI.attach(card, id);
 }
 function render() {
   for (const [id, card] of cards) {
-    const note = notes[id]; const mine = id === chosen; const isEditing = editing === id;
+    const note = historyUI.view(id); const mine = id === chosen; const isEditing = editing === id;
+    if (card.dataset.note !== note?.id) { card.dataset.note = note?.id || ''; if (!saving) card.querySelector('.note-status').textContent = ''; }
     card.querySelector('.yours').hidden = !mine;
     const message = card.querySelector('.message'); message.hidden = isEditing;
     message.textContent = !ready ? 'Opening this note…' : note?.text || (id === 'marshall' ? 'Available for cuddles. Payment accepted in treats.' : 'Nothing on the fridge yet.');
     message.classList.toggle('empty', !note?.text);
     card.querySelector('.editor').hidden = !isEditing;
-    const edit = card.querySelector('.edit'); edit.hidden = !mine || isEditing; edit.disabled = !ready;
+    const edit = card.querySelector('.edit'); edit.hidden = !mine || isEditing || historyUI.isPast(id); edit.disabled = !ready;
     card.querySelector('textarea').disabled = saving;
     for (const button of card.querySelectorAll('.editor button')) button.disabled = saving;
     const stamp = card.querySelector('.timestamp');
-    stamp.textContent = note?.updatedAt ? `Updated ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(note.updatedAt))}` : id === 'marshall' ? 'Very good boy. Very important note.' : 'A little space for you.';
+    stamp.textContent = note?.updatedAt ? `${historyUI.isPast(id) ? 'Earlier · ' : ''}${new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(note.updatedAt))}` : id === 'marshall' ? 'Very good boy. Very important note.' : 'A little space for you.';
   }
-  reactionsUI.render();
+  historyUI.render(); reactionsUI.render();
   $('#change').disabled = saving; $('#logout').disabled = saving;
 }
 $('#login-form').addEventListener('submit', async event => {
@@ -95,7 +99,7 @@ $('#logout').addEventListener('click', async () => {
 });
 window.addEventListener('beforeunload', event => { if (editing || saving || reactionsUI.isPending()) { event.preventDefault(); event.returnValue = ''; } });
 backend.watchAuth(user => {
-  stopNotes(); stopConnection(); reactionsUI.reset(); notes = {}; ready = false; connected = false; editing = ''; render();
+  stopNotes(); stopConnection(); historyUI.reset(); reactionsUI.reset(); notes = {}; ready = false; connected = false; editing = ''; render();
   $('#boot').hidden = true; $('#board-status').textContent = '';
   $('#logout').hidden = !user;
   if (!user || user.uid !== sharedUid) {
@@ -104,12 +108,12 @@ backend.watchAuth(user => {
     return;
   }
   if (chosen) selectPerson(chosen); else show('choose');
-  reactionsUI.listen();
+
   stopConnection = backend.watchConnection(value => {
-    connected = value; reactionsUI.render();
+    connected = value; historyUI.render(); reactionsUI.render();
     $('#connection').textContent = value ? '● Connected · updates arrive automatically' : '○ Reconnecting · notes may be out of date';
   });
   stopNotes = backend.watchNotes(value => { notes = value; ready = true; $('#board-status').textContent = ''; render(); }, () => {
-    ready = false; notes = {}; render(); $('#board-status').textContent = 'Can’t read the fridge. Ask Steve to check the database rules, then reload.';
+    ready = false; notes = {}; historyUI.reset(); render(); $('#board-status').textContent = 'Can’t read the fridge. Ask Steve to check the database rules, then reload.';
   });
 });

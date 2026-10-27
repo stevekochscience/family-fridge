@@ -30,3 +30,7 @@
 .reaction-dialog{max-width:min(360px,calc(100vw - 32px));width:100%;border:1px solid #b5b5a5;border-radius:16px;padding:26px;background:#fffdf5;color:#28372e;box-shadow:0 15px 70px #0003}
 .reaction-dialog::backdrop{background:#25382bc0}
 .reaction-dialog h2{font-size:27px;margin:0 0 16px}.reaction-names{line-height:1.7;overflow-wrap:anywhere;margin-bottom:22px}.reaction-dialog button{width:100%}
+
+.note-history{margin-top:6px}.history-controls{display:flex;align-items:center;justify-content:space-between;gap:2px;flex-wrap:wrap}
+.note-history .quiet{font-size:11px;padding:7px 3px;min-height:44px}.history-controls .latest{font-weight:700}
+.history-status{font-size:11px;line-height:1.4;margin:0}.history-status:empty{display:none}

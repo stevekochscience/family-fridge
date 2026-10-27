@@ -78,3 +78,26 @@ targeting family-fridge-db4c3 passed Firebase's syntax check and completed
 successfully. Stored messages and reactions were not modified. This proves
 deployment access and rule publication; it is not an authenticated browser
 reaction-save test.
+
+## Permanent history — October 27, 2026
+
+Passed with real Firebase Auth/Database emulators and the browser SDK:
+- Migration preserves current text, timestamps and matching reactions;
+  refuses to replace existing history and leaves its input unchanged.
+- Signed-out/other UID access, oversized/unbounded list reads, legacy
+  writes, invalid data, and rewriting/deleting historical notes are denied.
+- Historical reactions can be added, changed and removed.
+- Navigation crossed 27 earlier notes, with no 20-note cutoff.
+- Latest/newer/older, earliest boundary, historical dates and editing
+  restrictions work; new arrivals do not move the reader out of history.
+- Per-note reactions and names survive new posts; new posts start fresh.
+- Two simultaneous browser saves for the same person both survive.
+- Phone/desktop widths 320, 390 and 1280px fit without horizontal overflow;
+  history buttons are at least 44px high. Screenshot visually inspected.
+- Reload/sign-in/name persistence, offline feedback and sign-out passed;
+  no uncaught browser errors occurred.
+
+The live migration was backed up, applied additively, and read back to
+verify original data preservation. Production rules passed Firebase's
+syntax validation and deployed successfully. Browser behavior above was
+exercised against emulators, not by posting test notes to the live fridge.

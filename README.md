@@ -7,113 +7,89 @@ Four humans. One very good boy. Zero group-chat chaos.
 
 ## Use it
 
-Open the website, enter the family password, and choose Sammy, Gracie,
-Lisa, Steve, or Marshall. Marshall has a special full-width note; choose
-him to write on his behalf. Tap **Edit** on your own note, write up to 280 characters,
-and tap **Save**. Saving replaces your previous message. Other open
-fridges update automatically. **Switch name** lets someone else use
-the same browser. **Sign out** closes access on a shared device.
+Enter the family password and choose Sammy, Gracie, Lisa, Steve, or Marshall.
+Marshall gets a special full-width note; choose him to speak on his behalf.
+Tap **Edit** on your latest note, write up to 280 characters, and **Save**.
+Every save posts a new note and keeps the previous one. Other open fridges
+update automatically. Two people saving for the same name keep both notes.
 
-Sign-in and the chosen name are remembered where browser storage permits.
-Drafts are not saved across reloads. If a save is waiting for the server,
-keep the page open until it says **Saved**. Two people editing the same
-panel follow last-save-wins behavior; different panels save independently.
+**Earlier notes** appears only when a person has history. While browsing,
+use **Older**, **Newer**, or **Latest**. Older notes show their date and cannot
+be edited. New arrivals do not interrupt your browsing. Opening/reloading
+the page starts on everyone's latest note. There is no automatic history
+deletion or arbitrary note-count limit; Firebase's storage quotas still apply.
 
-## Reactions
+**React** offers six emojis. Each selected name gets one reaction per note;
+choose another to change it, or choose the same emoji again to remove it.
+Tap an emoji/count badge to see who reacted. Reactions stay attached to the
+specific note, and you can react to older notes too. Your reaction is outlined.
 
-Open **React** under a saved note and choose ❤️, 😂, 👍, 😮, 🤗, or 🐾.
-Each selected person gets one reaction per note. Choose another emoji to
-change it, or tap your selected emoji again to remove it. Tap an existing
-emoji/count badge to see who reacted. Your reaction has a dark outline.
-Reactions update automatically and are attached to the current note;
-saving a replacement note starts fresh. Unsaved placeholder notes have
-no reactions. Names remain on the same family honor system as editing.
-
-The reaction rules are published. Future rule changes can be deployed with
-the Firebase CLI command below. GitHub Pages does not publish Firebase rules.
+**Switch name** lets another family member use the browser. **Sign out**
+closes access on a shared device. Sign-in and chosen name are remembered
+when browser storage permits. Drafts do not survive reloads; keep the page
+open until saving finishes. Choosing names is an honor system.
 
 ## How it works
 
-GitHub Pages serves plain HTML, CSS, and JavaScript. There is no build step.
-The Firebase JavaScript SDK loads from Google's CDN; optional Google Fonts
-have system-font fallbacks. Firebase Authentication uses one shared
-email/password account. Realtime Database holds one object per person at
-`messages/sam`, `messages/grace`, `messages/lisa`, `messages/steve`, and `messages/marshall`.
-Each object has `text` and a server-generated `updatedAt` timestamp.
-Reactions live separately at `reactions/{note}/{person}`, with an allowed
-emoji key and the note timestamp they refer to. This avoids overwriting
-other people’s reactions or the message when saving. Old reactions are
-hidden after a new note is saved, with at most one stored entry per pair.
+GitHub Pages serves plain HTML, CSS, and JavaScript without a build step.
+Firebase Authentication uses one shared email/password account. The SDK
+loads from Google's CDN; optional Google Fonts have system-font fallbacks.
 
-The source and `config.js` are public, including the Firebase API key,
-shared email, and UID. These are client configuration, not administrator
-credentials. The family password is entered only at sign-in and is never
-included in the repository. Firebase manages the browser's saved session.
-Messages are rendered as plain text.
+Realtime Database stores each note at `boards/{person}/{noteId}`. Firebase
+push IDs give independent saves their own sortable keys. Each note has
+immutable `text` and server-generated `updatedAt` fields, plus an optional
+`reactions/{person}` emoji key. Latest queries fetch only two notes per person;
+history navigation fetches one or two at a time. A displayed older note has
+its own live listener, so its reactions update without loading the full stack.
 
-`database.rules.json` permits only the configured shared UID to read the
-notes and write the five allowed panels. It validates message length,
-field names, and timestamps. All family members share access to all five
-panels; choosing a name is an honor system, not individual authorization.
-Other accounts, including newly registered accounts, have no note access.
-
-Firebase project: `family-fridge-db4c3`, on **Spark** without billing.
-No Cloud Functions, paid hosting, or paid Firebase products are required.
-If free quotas are exhausted, service can become unavailable; do not
-enable billing just to follow this README.
+The source and `config.js` are public. The client API key, shared email, and
+UID are not administrator credentials. The password and CLI credentials are
+not in the repository. Rules allow only the shared UID, validate content and
+reaction names, prohibit rewriting/deleting saved notes, and bound list reads.
+Messages are rendered as plain text. Firebase project: `family-fridge-db4c3`
+on Spark, without billing, Cloud Functions, or a server to maintain.
 
 ## Maintain it
 
-- Edit colors and layout in `styles.css`, headings in `index.html`, and
-  the names and interactions in `app.js`.
-- Keep the IDs `sam`, `grace`, `lisa`, `steve`, and `marshall` consistent with the rules.
-- Change the shared email in `config.js` if the Firebase login uses a
-  different email from `family@example.com`.
-- To change the password, open Firebase Console → Authentication → Users
-  and edit the shared user. Never put the new password in code or a commit.
-  Existing saved sessions may remain active; changing the password should
-  not be treated as an instant sign-out on every device.
-- If replacing the shared account, update `sharedUid` in `config.js` and
-  the UID checks in `database.rules.json`, then publish the rules in
-  Firebase Console → Realtime Database → Rules.
-- Git commits do **not** automatically deploy Firebase rules. Publish
-  those explicitly in Firebase Console and keep the repository copy in sync.
-- Push site changes to `main`; GitHub Pages publishes from the root of
-  that branch. Check repository Settings → Pages for deployment status.
+- Colors/layout: `styles.css`; page wording: `index.html`.
+- Board interactions/names: `app.js`; browsing: `history.js`;
+  reactions: `reactions.js`; Firebase calls: `backend.js`.
+- Keep the IDs `sam`, `grace`, `lisa`, `steve`, and `marshall` consistent
+  with `database.rules.json` and the latest-note subscriptions in `backend.js`.
+- Change the shared user's password in Firebase Console → Authentication →
+  Users, never in source. Existing sessions may not sign out immediately.
+- Push site changes to `main`; GitHub Pages publishes the repository root.
+- Rules deploy separately. Compare console edits with the repository before
+  deploying, because deployment replaces the live rules.
 
-## Deploy database rules
-
-Firebase CLI is configured by `firebase.json` and `.firebaserc`.
-From this repository, after signing in with `firebase login`, run:
+From this repository, after `firebase login`:
 
 ```sh
 firebase deploy --only database --project family-fridge-db4c3
 ```
 
-On this Windows computer, if `firebase` is not on PATH, use PowerShell:
+On this Windows computer if Firebase is not on PATH:
 
 ```powershell
 & "$env:APPDATA\npm\firebase.cmd" deploy --only database --project family-fridge-db4c3
 ```
 
-This deploys `database.rules.json` without changing the stored notes or
-reactions. It replaces the live rules, so compare any console edits first.
-CLI credentials stay outside the repository. Use the explicit project ID
-to avoid deploying to a different Firebase project. No billing is required.
+## Migration from the original board
 
-## Run locally
+The October 27 history upgrade preserves each currently saved note and its
+matching reactions as the first entry. Previously overwritten messages were
+not recoverable. Legacy `messages` and `reactions` remain in the database as
+a read-only fallback; the new app uses `boards`. Old browser tabs must reload
+before saving. Do not restore the old app/rules after new history is in use.
 
-Serve this folder with any static HTTP server, for example:
+`scripts/migrate-history.cjs` transforms a private database snapshot into an
+additive update; it does not connect to Firebase and refuses snapshots with
+existing history. Backup files contain private messages and must stay outside
+this public repository. Never rerun a migration against an existing stack.
 
-```sh
-python -m http.server 8080
-```
+## Local development and testing
 
-Open `http://localhost:8080`. Do not open `index.html` directly as a file.
-Local development uses the live Firebase project unless you explicitly
-configure Firebase emulators. Avoid overwriting real notes during tests.
-
-## Verification
-
-See `TESTING.md` for the prototype's tested behavior and remaining
-real-device checks.
+Serve this folder over HTTP, for example `python -m http.server 8080`, and
+open `http://localhost:8080`. Production configuration targets the live project;
+use Firebase emulators for destructive tests. See `TESTING.md` for evidence
+and the distinction between emulator/browser tests and real-phone checks.
