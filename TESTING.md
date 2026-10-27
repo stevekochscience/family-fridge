@@ -43,3 +43,12 @@ Optional follow-up checks:
 
 The automated run did not test physical iPhone/Android devices or Safari;
 the successful phone check above was performed by Steve.
+
+## Marshall addition
+
+Verified with a simulated backend: Marshall appears in the name picker,
+his note can be edited and saved, and selection and text survive reload.
+At 320, 390, and 1280px, his full-width note sits below the human 2 x 2
+grid without horizontal overflow. No uncaught browser errors occurred.
+The expanded production database rule still needs publishing in Firebase.
+

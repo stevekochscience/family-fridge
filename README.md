@@ -1,6 +1,6 @@
 # Family Fridge
 
-Four little notes. Zero group-chat chaos.
+Four humans. One very good boy. Zero group-chat chaos.
 
 - Website: https://stevekochscience.github.io/family-fridge/
 - Repository: https://github.com/stevekochscience/family-fridge
@@ -8,7 +8,8 @@ Four little notes. Zero group-chat chaos.
 ## Use it
 
 Open the website, enter the family password, and choose Sammy, Gracie,
-Lisa, or Steve. Tap **Edit** on your own note, write up to 280 characters,
+Lisa, Steve, or Marshall. Marshall has a special full-width note; choose
+him to write on his behalf. Tap **Edit** on your own note, write up to 280 characters,
 and tap **Save**. Saving replaces your previous message. Other open
 fridges update automatically. **Switch name** lets someone else use
 the same browser. **Sign out** closes access on a shared device.
@@ -24,7 +25,7 @@ GitHub Pages serves plain HTML, CSS, and JavaScript. There is no build step.
 The Firebase JavaScript SDK loads from Google's CDN; optional Google Fonts
 have system-font fallbacks. Firebase Authentication uses one shared
 email/password account. Realtime Database holds one object per person at
-`messages/sam`, `messages/grace`, `messages/lisa`, and `messages/steve`.
+`messages/sam`, `messages/grace`, `messages/lisa`, `messages/steve`, and `messages/marshall`.
 Each object has `text` and a server-generated `updatedAt` timestamp.
 
 The source and `config.js` are public, including the Firebase API key,
@@ -34,8 +35,8 @@ included in the repository. Firebase manages the browser's saved session.
 Messages are rendered as plain text.
 
 `database.rules.json` permits only the configured shared UID to read the
-notes and write the four allowed panels. It validates message length,
-field names, and timestamps. All family members share access to all four
+notes and write the five allowed panels. It validates message length,
+field names, and timestamps. All family members share access to all five
 panels; choosing a name is an honor system, not individual authorization.
 Other accounts, including newly registered accounts, have no note access.
 
@@ -48,7 +49,7 @@ enable billing just to follow this README.
 
 - Edit colors and layout in `styles.css`, headings in `index.html`, and
   the names and interactions in `app.js`.
-- Keep the IDs `sam`, `grace`, `lisa`, and `steve` consistent with the rules.
+- Keep the IDs `sam`, `grace`, `lisa`, `steve`, and `marshall` consistent with the rules.
 - Change the shared email in `config.js` if the Firebase login uses a
   different email from `family@example.com`.
 - To change the password, open Firebase Console → Authentication → Users
@@ -79,3 +80,4 @@ configure Firebase emulators. Avoid overwriting real notes during tests.
 
 See `TESTING.md` for the prototype's tested behavior and remaining
 real-device checks.
+

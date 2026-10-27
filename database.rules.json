@@ -5,7 +5,7 @@
     "messages": {
       ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3'",
       "$person": {
-        ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve') && newData.exists()",
+        ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall') && newData.exists()",
         ".validate": "newData.hasChildren(['text', 'updatedAt'])",
         "text": { ".validate": "newData.isString() && newData.val().length <= 280" },
         "updatedAt": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now" },
