@@ -100,3 +100,28 @@ Serve this folder over HTTP, for example `python -m http.server 8080`, and
 open `http://localhost:8080`. Production configuration targets the live project;
 use Firebase emulators for destructive tests. See `TESTING.md` for evidence
 and the distinction between emulator/browser tests and real-phone checks.
+
+## Family photo album
+
+The album at the bottom holds one current photo per person (including Marshall).
+Choose your name, tap **Add my photo** or **Replace my photo**, review the
+compressed preview, then **Save photo**. Previous/Next browses the family
+photos; **Remove mine** deletes your slot. Replacements do not keep history.
+
+The browser decodes and redraws the image as JPEG, removing original metadata
+and resizing to at most 1200 pixels on the longest side. Compression/resize
+continues until the JPEG is at most 150 KB (200,023 characters including the
+Base64 data URL prefix). Input files are limited to 20 MB and 50 megapixels.
+Unsupported formats show an error; JPEG, PNG and WebP are the safest choices.
+The preview locks name switching/sign-out until saved or canceled.
+
+`photos.js` handles the album and compression. `photos/{person}` stores only
+`data` and `updatedAt`, independently of note history. The album has its own
+live subscription, so note browsing does not re-download photos. All five
+full slots total about 1 MB of encoded data per initial album download.
+Rules restrict access to the shared UID, named slots, JPEG data URL syntax,
+size and timestamp. Rules cannot decode or verify image pixels; the browser
+does that. Names remain on the honor system, as with the notes.
+
+This uses Realtime Database on Spark, without Cloud Storage or billing.
+Photos are protected by the same shared login as notes, not publicly readable.

@@ -42,6 +42,22 @@
           }
         }
       }
+    },
+    "photos": {
+      ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3'",
+      "$person": {
+        ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall')",
+        ".validate": "newData.hasChildren(['data', 'updatedAt'])",
+        "data": {
+          ".validate": "newData.isString() && newData.val().length <= 200023 && newData.val().matches(/^data:image\\/jpeg;base64,[A-Za-z0-9+\\/]+={0,2}$/)"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }

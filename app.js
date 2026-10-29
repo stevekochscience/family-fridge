@@ -1,7 +1,9 @@
-import * as backend from './backend.js?v=ideas-1';
-import { createReactions } from './reactions.js?v=ideas-1';
+import * as backend from './backend.js?v=photos-1';
+import { createReactions } from './reactions.js?v=photos-1';
 import { sharedUid } from './config.js';
-import { createHistory } from './history.js?v=ideas-1';
+import { createHistory } from './history.js?v=photos-1';
+
+import { createAlbum } from './photos.js?v=photos-1';
 
 const people = [['sam', 'Sammy'], ['grace', 'Gracie'], ['lisa', 'Lisa'], ['steve', 'Steve'], ['marshall', 'Marshall']];
 const panels = [...people, ['ideas', '💡 Ideas']];
@@ -73,6 +75,7 @@ for (const [id, name] of panels) {
   });
   $('#notes').append(card); cards.set(id, card); historyUI.attach(card, id); reactionsUI.attach(card, id);
 }
+const album = createAlbum({ backend, people, getState: () => ({ chosen, connected }), onChange: () => render() });
 function render() {
   for (const [id, card] of cards) {
     const note = historyUI.view(id); const mine = id === chosen; const isEditing = editing === id;
@@ -90,7 +93,8 @@ function render() {
     if (id === 'ideas' && note?.author) stamp.textContent = `${people.find(([key]) => key === note.author)?.[1] || 'Family'} · ${stamp.textContent}`;
   }
   historyUI.render(); reactionsUI.render();
-  $('#change').disabled = saving; $('#logout').disabled = saving;
+  album.render();
+  $('#change').disabled = saving || album.isPending(); $('#logout').disabled = saving || album.isPending();
 }
 $('#login-form').addEventListener('submit', async event => {
   event.preventDefault(); $('#unlock').disabled = true; $('#login-status').textContent = 'Opening…';
@@ -106,9 +110,9 @@ $('#logout').addEventListener('click', async () => {
   if (editing && !confirm('Discard your unsaved note and sign out?')) return;
   try { await backend.logout(); } catch { $('#board-status').textContent = 'Couldn’t sign out. Check your connection and try again.'; }
 });
-window.addEventListener('beforeunload', event => { if (editing || saving || reactionsUI.isPending()) { event.preventDefault(); event.returnValue = ''; } });
+window.addEventListener('beforeunload', event => { if (editing || saving || reactionsUI.isPending() || album.isPending()) { event.preventDefault(); event.returnValue = ''; } });
 backend.watchAuth(user => {
-  stopNotes(); stopConnection(); historyUI.reset(); reactionsUI.reset(); notes = {}; ready = false; connected = false; editing = ''; render();
+  stopNotes(); stopConnection(); album.reset(); historyUI.reset(); reactionsUI.reset(); notes = {}; ready = false; connected = false; editing = ''; render();
   $('#boot').hidden = true; $('#board-status').textContent = '';
   $('#logout').hidden = !user;
   if (!user || user.uid !== sharedUid) {
@@ -116,10 +120,11 @@ backend.watchAuth(user => {
     if (user) { $('#login-status').textContent = 'This account doesn’t have a key to this fridge.'; backend.logout().catch(() => {}); }
     return;
   }
+  album.start();
   if (chosen) selectPerson(chosen); else show('choose');
 
   stopConnection = backend.watchConnection(value => {
-    connected = value; historyUI.render(); reactionsUI.render();
+    connected = value; historyUI.render(); reactionsUI.render(); album.render();
     $('#connection').textContent = value ? '● Connected · updates arrive automatically' : '○ Reconnecting · notes may be out of date';
   });
   stopNotes = backend.watchNotes(value => { notes = value; ready = true; $('#board-status').textContent = ''; render(); }, () => {

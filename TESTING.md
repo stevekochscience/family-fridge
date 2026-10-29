@@ -118,3 +118,23 @@ Passed Firebase Auth/Database emulator and two-session Edge checks:
 
 These tests used isolated emulator data. Physical phone keyboard/paste
 behavior and authenticated production saves need a family check.
+
+## Compressed photo album — October 29, 2026
+
+Passed isolated Firebase emulator and two-browser Edge tests:
+
+- Signed-out/other-account photo reads denied; unauthorized writes, unknown
+  names, non-JPEG data URLs, oversized data, extra/missing fields and future
+  timestamps rejected. Valid replacements and removals allowed.
+- A generated 2400 x 1800 PNG was resized and encoded to a JPEG within the
+  stored size limit, previewed, then saved through the real browser SDK.
+- Uploads appeared live in the other browser; separate people retained
+  separate slots, replacing a photo kept only one slot, and carousel
+  navigation and reload persistence worked.
+- Preview/cancel, invalid-image feedback, offline upload controls, removal
+  and sign-out passed. Existing notes/history/reactions tests also passed.
+- No horizontal overflow at 320, 390 or 1280px. Album screenshot inspected.
+
+No real family photos were used in automated testing. Physical phone file
+selection, camera orientation and HEIC decoding remain to be checked on
+family devices; unsupported formats produce a JPEG/PNG/WebP suggestion.

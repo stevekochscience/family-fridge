@@ -41,3 +41,6 @@ export async function getAdjacent(person, id, direction) {
 }
 export const watchNote = (person, id, callback, failure) => onValue(ref(db, `boards/${person}/${id}`), snapshot => callback(snapshot.exists() ? { ...snapshot.val(), id: snapshot.key } : null), failure);
 export const saveReaction = (person, noteId, reactor, emoji) => set(ref(db, `boards/${person}/${noteId}/reactions/${reactor}`), emoji);
+
+export const watchPhotos = (callback, failure) => onValue(ref(db, 'photos'), snapshot => callback(snapshot.val()), failure);
+export const savePhoto = (person, data) => set(ref(db, `photos/${person}`), data ? { data, updatedAt: serverTimestamp() } : null);
