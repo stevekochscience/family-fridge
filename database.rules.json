@@ -10,13 +10,13 @@
     },
     "boards": {
       "$person": {
-        ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall') && query.orderByKey && ((query.limitToLast != null && query.limitToLast <= 10) || (query.limitToFirst != null && query.limitToFirst <= 10))",
+        ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall' || $person === 'ideas') && query.orderByKey && ((query.limitToLast != null && query.limitToLast <= 10) || (query.limitToFirst != null && query.limitToFirst <= 10))",
         "$note": {
-          ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall')",
-          ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall') && $note.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.exists()",
-          ".validate": "newData.hasChildren(['text', 'updatedAt']) && (!data.exists() || (newData.child('text').val() === data.child('text').val() && newData.child('updatedAt').val() === data.child('updatedAt').val()))",
+          ".read": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall' || $person === 'ideas')",
+          ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall' || $person === 'ideas') && $note.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['text', 'updatedAt']) && (!data.exists() || (newData.child('text').val() === data.child('text').val() && newData.child('updatedAt').val() === data.child('updatedAt').val())) && ($person !== 'ideas' || newData.hasChild('author')) && (!data.exists() || newData.child('author').val() === data.child('author').val())",
           "text": {
-            ".validate": "newData.isString() && newData.val().length <= 280"
+            ".validate": "newData.isString() && newData.val().length <= 280 && ($person !== 'ideas' || !newData.val().matches(/^[ \\t\\r\\n]*$/))"
           },
           "updatedAt": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now"
@@ -24,12 +24,21 @@
           "reactions": {
             ".validate": "newData.hasChildren()",
             "$reactor": {
-              ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall') && ($reactor === 'sam' || $reactor === 'grace' || $reactor === 'lisa' || $reactor === 'steve' || $reactor === 'marshall') && root.child('boards').child($person).child($note).child('text').isString() && root.child('boards').child($person).child($note).child('text').val().length > 0",
-              ".validate": "($reactor === 'sam' || $reactor === 'grace' || $reactor === 'lisa' || $reactor === 'steve' || $reactor === 'marshall') && newData.isString() && (newData.val() === 'heart' || newData.val() === 'laugh' || newData.val() === 'like' || newData.val() === 'wow' || newData.val() === 'hug' || newData.val() === 'paw') && newData.parent().parent().child('text').val().length > 0"
+              ".write": "auth != null && auth.uid === 'HQCfNIhbpzSWBxXJ6o9SWaojtkD3' && ($person === 'sam' || $person === 'grace' || $person === 'lisa' || $person === 'steve' || $person === 'marshall' || $person === 'ideas') && ($reactor === 'sam' || $reactor === 'grace' || $reactor === 'lisa' || $reactor === 'steve' || $reactor === 'marshall') && root.child('boards').child($person).child($note).child('text').isString() && root.child('boards').child($person).child($note).child('text').val().length > 0",
+              ".validate": "($reactor === 'sam' || $reactor === 'grace' || $reactor === 'lisa' || $reactor === 'steve' || $reactor === 'marshall') && (newData.hasChildren(['text']) || (newData.isString() && (newData.val() === 'heart' || newData.val() === 'laugh' || newData.val() === 'like' || newData.val() === 'wow' || newData.val() === 'hug' || newData.val() === 'paw'))) && newData.parent().parent().child('text').val().length > 0",
+              "text": {
+                ".validate": "newData.isString() && newData.val().length <= 32 && !newData.val().matches(/^[ \\t\\r\\n]*$/)"
+              },
+              "$other": {
+                ".validate": false
+              }
             }
           },
           "$other": {
             ".validate": false
+          },
+          "author": {
+            ".validate": "$person === 'ideas' && newData.isString() && (newData.val() === 'sam' || newData.val() === 'grace' || newData.val() === 'lisa' || newData.val() === 'steve' || newData.val() === 'marshall')"
           }
         }
       }

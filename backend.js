@@ -6,7 +6,7 @@ import { firebaseConfig, sharedEmail } from './config.js';
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const people = ['sam', 'grace', 'lisa', 'steve', 'marshall'];
+const people = ['sam', 'grace', 'lisa', 'steve', 'marshall', 'ideas'];
 const entries = snapshot => {
   const result = [];
   snapshot.forEach(child => { result.push({ ...child.val(), id: child.key }); });
@@ -29,9 +29,9 @@ export function watchNotes(callback, failure) {
   }, failure));
   return () => stops.forEach(stop => stop());
 }
-export async function saveNote(person, text) {
+export async function saveNote(person, text, author) {
   const note = push(ref(db, `boards/${person}`));
-  await set(note, { text, updatedAt: serverTimestamp() });
+  await set(note, { text, updatedAt: serverTimestamp(), ...(person === 'ideas' ? { author } : {}) });
 }
 export async function getAdjacent(person, id, direction) {
   const list = entries(await get(query(ref(db, `boards/${person}`), orderByKey(),

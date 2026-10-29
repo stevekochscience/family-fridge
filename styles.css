@@ -34,3 +34,5 @@
 .note-history{margin-top:6px}.history-controls{display:flex;align-items:center;justify-content:space-between;gap:2px;flex-wrap:wrap}
 .note-history .quiet{font-size:11px;padding:7px 3px;min-height:44px}.history-controls .latest{font-weight:700}
 .history-status{font-size:11px;line-height:1.4;margin:0}.history-status:empty{display:none}
+
+.note.ideas{grid-column:1 / -1;background:#e5dcf2;min-height:220px}.custom-reaction label{font-size:12px;margin:12px 0 6px}.custom-reaction input{margin:6px 0;min-width:0}.custom-reaction button{padding:8px 10px;font-size:12px}.reaction-chip,.reaction-dialog h2{max-width:100%;overflow-wrap:anywhere}

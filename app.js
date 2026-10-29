@@ -1,9 +1,10 @@
-import * as backend from './backend.js?v=history-1';
-import { createReactions } from './reactions.js?v=history-1';
+import * as backend from './backend.js?v=ideas-1';
+import { createReactions } from './reactions.js?v=ideas-1';
 import { sharedUid } from './config.js';
-import { createHistory } from './history.js?v=history-1';
+import { createHistory } from './history.js?v=ideas-1';
 
 const people = [['sam', 'Sammy'], ['grace', 'Gracie'], ['lisa', 'Lisa'], ['steve', 'Steve'], ['marshall', 'Marshall']];
+const panels = [...people, ['ideas', '💡 Ideas']];
 const $ = selector => document.querySelector(selector);
 let chosen = '';
 try { chosen = localStorage.getItem('fridge-person') || ''; } catch { /* Storage can be blocked. */ }
@@ -12,7 +13,7 @@ let notes = {}, editing = '', saving = false, connected = false, ready = false;
 let stopNotes = () => {}, stopConnection = () => {};
 const cards = new Map();
 const historyUI = createHistory({ backend, getState: () => ({ notes, ready, connected, editing, saving }), onChange: () => render() });
-const visibleNotes = () => Object.fromEntries(people.map(([id]) => [id, historyUI.view(id)]));
+const visibleNotes = () => Object.fromEntries(panels.map(([id]) => [id, historyUI.view(id)]));
 const reactionsUI = createReactions({ people, backend, getState: () => ({ notes: visibleNotes(), chosen, ready, connected, saving }) });
 
 function show(id) {
@@ -30,9 +31,9 @@ function selectPerson(id) {
   $('#identity').textContent = id === 'marshall' ? 'You’re speaking for Marshall 🐾' : `You’re ${people.find(([key]) => key === id)[1]}`;
   show('board'); render();
 }
-for (const [id, name] of people) {
+for (const [id, name] of panels) {
   const button = document.createElement('button'); button.className = id; button.textContent = id === 'marshall' ? '🐾 Marshall' : name;
-  button.addEventListener('click', () => selectPerson(id)); $('#names').append(button);
+  button.addEventListener('click', () => selectPerson(id)); if (id !== 'ideas') $('#names').append(button);
   const card = document.createElement('article'); card.className = `note ${id}`; card.setAttribute('aria-label', `${name}’s note`);
   // Only fixed application markup is inserted as HTML. Messages use textContent/value.
   card.innerHTML = `<div class="note-heading"><h3>${name}</h3><span class="yours" hidden>you</span></div><p class="message"></p><form class="editor" hidden><label for="note-${id}">Your note</label><textarea id="note-${id}" maxlength="280"></textarea><p class="counter"></p><div class="actions"><button type="submit">Save</button><button type="button" class="quiet cancel">Cancel</button></div></form><div class="note-bottom"><span class="timestamp"></span><button class="edit" hidden>Edit</button></div><p class="note-status" role="status"></p>`;
@@ -42,22 +43,29 @@ for (const [id, name] of people) {
     card.querySelector('.yours').textContent = 'your human';
     card.querySelector('label').textContent = 'A note from Marshall';
   }
+  if (id === 'ideas') {
+    card.setAttribute('aria-label', 'Shared ideas');
+    card.querySelector('.edit').textContent = 'Add an idea';
+    card.querySelector('label').textContent = 'What could make the fridge more fun?';
+    card.querySelector('button[type=submit]').textContent = 'Post idea';
+  }
   const textarea = card.querySelector('textarea');
   textarea.addEventListener('input', () => { card.querySelector('.counter').textContent = `${textarea.value.length}/280`; });
   card.querySelector('.edit').addEventListener('click', () => {
-    editing = id; textarea.value = notes[id]?.text || ''; textarea.dispatchEvent(new Event('input'));
+    editing = id; textarea.value = id === 'ideas' ? '' : notes[id]?.text || ''; textarea.dispatchEvent(new Event('input'));
     card.querySelector('.note-status').textContent = ''; render(); textarea.focus();
   });
   card.querySelector('.cancel').addEventListener('click', () => { editing = ''; render(); card.querySelector('.edit').focus(); });
   card.querySelector('form').addEventListener('submit', async event => {
     event.preventDefault();
-    if (saving || id !== chosen || editing !== id) return;
+    if (saving || (id !== chosen && id !== 'ideas') || editing !== id) return;
     if (!connected || !ready) { card.querySelector('.note-status').textContent = 'Not connected. Keep your note here and try again when online.'; return; }
     if (textarea.value.length > 280) return;
+    if (id === 'ideas' && !textarea.value.trim()) { card.querySelector('.note-status').textContent = 'Write an idea first.'; textarea.focus(); return; }
     saving = true; card.querySelector('.note-status').textContent = 'Saving…'; render();
     const slow = setTimeout(() => { if (saving) card.querySelector('.note-status').textContent = 'Still waiting for the server. Keep this page open.'; }, 8000);
     try {
-      await backend.saveNote(id, textarea.value);
+      await backend.saveNote(id, id === 'ideas' ? textarea.value.trim() : textarea.value, chosen);
       editing = ''; historyUI.latest(id); card.querySelector('.note-status').textContent = 'Saved ✓';
     } catch {
       card.querySelector('.note-status').textContent = 'Couldn’t save. Your draft is still here—try again.';
@@ -71,14 +79,15 @@ function render() {
     if (card.dataset.note !== note?.id) { card.dataset.note = note?.id || ''; if (!saving) card.querySelector('.note-status').textContent = ''; }
     card.querySelector('.yours').hidden = !mine;
     const message = card.querySelector('.message'); message.hidden = isEditing;
-    message.textContent = !ready ? 'Opening this note…' : note?.text || (id === 'marshall' ? 'Available for cuddles. Payment accepted in treats.' : 'Nothing on the fridge yet.');
+    message.textContent = !ready ? 'Opening this note…' : note?.text || (id === 'marshall' ? 'Available for cuddles. Payment accepted in treats.' : id === 'ideas' ? 'Ideas welcome! Leave a suggestion for the fridge here.' : 'Nothing on the fridge yet.');
     message.classList.toggle('empty', !note?.text);
     card.querySelector('.editor').hidden = !isEditing;
-    const edit = card.querySelector('.edit'); edit.hidden = !mine || isEditing || historyUI.isPast(id); edit.disabled = !ready;
+    const edit = card.querySelector('.edit'); edit.hidden = (!mine && id !== 'ideas') || isEditing || historyUI.isPast(id); edit.disabled = !ready || saving || Boolean(editing && editing !== id);
     card.querySelector('textarea').disabled = saving;
     for (const button of card.querySelectorAll('.editor button')) button.disabled = saving;
     const stamp = card.querySelector('.timestamp');
-    stamp.textContent = note?.updatedAt ? `${historyUI.isPast(id) ? 'Earlier · ' : ''}${new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(note.updatedAt))}` : id === 'marshall' ? 'Very good boy. Very important note.' : 'A little space for you.';
+    stamp.textContent = note?.updatedAt ? `${historyUI.isPast(id) ? 'Earlier · ' : ''}${new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(note.updatedAt))}` : id === 'marshall' ? 'Very good boy. Very important note.' : id === 'ideas' ? 'Everyone can post. Steve can pick ideas to build.' : 'A little space for you.';
+    if (id === 'ideas' && note?.author) stamp.textContent = `${people.find(([key]) => key === note.author)?.[1] || 'Family'} · ${stamp.textContent}`;
   }
   historyUI.render(); reactionsUI.render();
   $('#change').disabled = saving; $('#logout').disabled = saving;

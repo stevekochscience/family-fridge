@@ -101,3 +101,20 @@ The live migration was backed up, applied additively, and read back to
 verify original data preservation. Production rules passed Firebase's
 syntax validation and deployed successfully. Browser behavior above was
 exercised against emulators, not by posting test notes to the live fridge.
+
+## Custom reactions and shared ideas — October 29, 2026
+
+Passed Firebase Auth/Database emulator and two-session Edge checks:
+
+- Custom emoji/text reactions, legacy emoji compatibility, names popup,
+  removal, literal HTML rendering, and per-note history persistence.
+- Rules reject empty/oversized/malformed reactions, invalid authors and
+  author changes; shared ideas still require the authorized account.
+- Two different people can submit ideas and see updates automatically.
+- Idea history preserves authors and reactions after newer posts and reload.
+- Expanded reaction controls fit at 320, 390 and 1280px.
+- Existing history, concurrent saves, offline handling, login persistence
+  and sign-out regression checks passed with no uncaught browser errors.
+
+These tests used isolated emulator data. Physical phone keyboard/paste
+behavior and authenticated production saves need a family check.

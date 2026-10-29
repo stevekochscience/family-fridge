@@ -19,10 +19,16 @@ be edited. New arrivals do not interrupt your browsing. Opening/reloading
 the page starts on everyone's latest note. There is no automatic history
 deletion or arbitrary note-count limit; Firebase's storage quotas still apply.
 
-**React** offers six emojis. Each selected name gets one reaction per note;
+**React** offers quick emojis plus a text box for any emoji or short reaction
+(up to 32 characters). Paste from your keyboard or type something like `cool!`. Each selected name gets one reaction per note;
 choose another to change it, or choose the same emoji again to remove it.
-Tap an emoji/count badge to see who reacted. Reactions stay attached to the
+Use **Remove mine** to clear a custom reaction. Tap a reaction/count badge to see who reacted. Reactions stay attached to the
 specific note, and you can react to older notes too. Your reaction is outlined.
+
+**Ideas**, the shared purple note at the bottom, lets everyone **Add an idea**
+(up to 280 characters). Each suggestion keeps its author, date, history, and
+reactions. Suggestions are recorded for Steve to review; they never trigger
+automatic code changes or AI spending.
 
 **Switch name** lets another family member use the browser. **Sign out**
 closes access on a shared device. Sign-in and chosen name are remembered
@@ -38,7 +44,8 @@ loads from Google's CDN; optional Google Fonts have system-font fallbacks.
 Realtime Database stores each note at `boards/{person}/{noteId}`. Firebase
 push IDs give independent saves their own sortable keys. Each note has
 immutable `text` and server-generated `updatedAt` fields, plus an optional
-`reactions/{person}` emoji key. Latest queries fetch only two notes per person;
+`reactions/{person}` object containing `text` (old emoji keys still display).
+The shared `boards/ideas/{noteId}` stack also has an immutable `author`. Latest queries fetch only two notes per person;
 history navigation fetches one or two at a time. A displayed older note has
 its own live listener, so its reactions update without loading the full stack.
 
@@ -55,7 +62,7 @@ on Spark, without billing, Cloud Functions, or a server to maintain.
 - Board interactions/names: `app.js`; browsing: `history.js`;
   reactions: `reactions.js`; Firebase calls: `backend.js`.
 - Keep the IDs `sam`, `grace`, `lisa`, `steve`, and `marshall` consistent
-  with `database.rules.json` and the latest-note subscriptions in `backend.js`.
+  plus the shared `ideas` panel with `database.rules.json` and the latest-note subscriptions in `backend.js`.
 - Change the shared user's password in Firebase Console → Authentication →
   Users, never in source. Existing sessions may not sign out immediately.
 - Push site changes to `main`; GitHub Pages publishes the repository root.
