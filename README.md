@@ -125,3 +125,17 @@ does that. Names remain on the honor system, as with the notes.
 
 This uses Realtime Database on Spark, without Cloud Storage or billing.
 Photos are protected by the same shared login as notes, not publicly readable.
+
+### Photo reactions
+
+Use **React** underneath the album to react to the displayed photo with an
+emoji or up to 32 characters of text. Each name gets one reaction per photo;
+tap a reaction badge to see who left it, or **Remove mine** to clear yours.
+Reactions appear live and survive reloads. Replacing/removing a photo clears
+its reactions; old photo reactions are not kept in history.
+
+Photo reactions are stored at `photos/{person}/reactions/{reactor}` with
+`text` and `photoUpdatedAt`. Saves use a transaction checking the displayed
+photo timestamp, so a delayed add/remove cannot affect a replacement.
+Rules validate the text, reactor name and matching timestamp. The shared
+account still means names and photo ownership are on the honor system.

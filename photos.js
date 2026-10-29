@@ -1,3 +1,5 @@
+import { createReactions } from './reactions.js?v=photo-reactions-1';
+
 // Photos are re-encoded locally: no original file or metadata is uploaded.
 export async function compressPhoto(file) {
   if (!file || file.size > 20 * 1024 * 1024) throw new Error('Choose a photo smaller than 20 MB.');
@@ -32,6 +34,20 @@ export function createAlbum({ backend, people, getState, onChange }) {
   document.querySelector('#notes').append(card);
   const $ = selector => card.querySelector(selector);
   let photos = {}, selected = '', draft = '', busy = false, loaded = false, epoch = 0, stop = () => {};
+  const photoReactions = createReactions({
+    people, dialogId: 'photo-reaction-title', onPendingChange: onChange,
+    backend: { saveReaction: (_album, photoId, reactor, value) => {
+      const [owner, timestamp] = photoId.split('/');
+      return backend.savePhotoReaction(owner, Number(timestamp), reactor, value);
+    } },
+    getState: () => {
+      const photo = photos[selected], state = getState();
+      return { ...state, ready: loaded, saving: busy || Boolean(draft), notes: {
+        album: photo ? { id: selected + '/' + photo.updatedAt, text: 'photo', reactions: photo.reactions } : null
+      } };
+    }
+  });
+  photoReactions.attach(card, 'album');
   const status = message => { $('.photo-status').textContent = message; };
   function render() {
     const state = getState(), entries = people.filter(([id]) => photos[id]);
@@ -53,6 +69,7 @@ export function createAlbum({ backend, people, getState, onChange }) {
     const preview = $('.photo-draft img');
     if (draft) { if (preview.getAttribute('src') !== draft) preview.src = draft; }
     else preview.removeAttribute('src');
+    photoReactions.render();
   }
   const refresh = () => { render(); onChange(); };
   function move(direction) { const ids = people.filter(([id]) => photos[id]).map(([id]) => id); if (ids.length) selected = ids[(ids.indexOf(selected) + direction + ids.length) % ids.length]; render(); }
@@ -77,10 +94,10 @@ export function createAlbum({ backend, people, getState, onChange }) {
   }
   $('.photo-save').onclick = () => { if (draft) save(draft); };
   $('.photo-remove').onclick = () => { if (confirm('Remove your photo from the album?')) save(null); };
-  function reset() { epoch++; stop(); stop = () => {}; photos = {}; selected = ''; draft = ''; busy = false; loaded = false; status(''); render(); }
+  function reset() { epoch++; photoReactions.reset(); stop(); stop = () => {}; photos = {}; selected = ''; draft = ''; busy = false; loaded = false; status(''); render(); }
   function start() {
     reset(); const token = epoch;
     stop = backend.watchPhotos(value => { if (token === epoch) { photos = value || {}; loaded = true; render(); } }, () => { if (token === epoch) { photos = {}; loaded = false; render(); status('Couldn’t open the album. Reload to try again.'); } });
   }
-  return { start, reset, render, isPending: () => busy || Boolean(draft) };
+  return { start, reset, render, isPending: () => busy || Boolean(draft) || photoReactions.isPending() };
 }

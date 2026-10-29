@@ -138,3 +138,16 @@ Passed isolated Firebase emulator and two-browser Edge tests:
 No real family photos were used in automated testing. Physical phone file
 selection, camera orientation and HEIC decoding remain to be checked on
 family devices; unsupported formats produce a JPEG/PNG/WebP suggestion.
+
+## Photo reactions — October 29, 2026
+
+Passed Firebase emulator and two-browser Edge checks: custom text/emoji
+photo reactions, grouped reactor-name popup, changing/removing reactions,
+literal HTML rendering, reload persistence, and photo replacement clearing
+old reactions. Delayed add and remove requests against an old photo version
+were rejected without changing the replacement photo. Rules rejected invalid
+reactors, empty/oversized/extra reaction fields, wrong photo timestamps and
+unauthenticated reaction writes. Existing note/history/ideas and album tests
+also passed, including mobile widths and offline controls.
+
+These authenticated checks used isolated emulator data, not family photos.

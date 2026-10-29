@@ -1,9 +1,9 @@
-import * as backend from './backend.js?v=photos-1';
-import { createReactions } from './reactions.js?v=photos-1';
+import * as backend from './backend.js?v=photo-reactions-1';
+import { createReactions } from './reactions.js?v=photo-reactions-1';
 import { sharedUid } from './config.js';
-import { createHistory } from './history.js?v=photos-1';
+import { createHistory } from './history.js?v=photo-reactions-1';
 
-import { createAlbum } from './photos.js?v=photos-1';
+import { createAlbum } from './photos.js?v=photo-reactions-1';
 
 const people = [['sam', 'Sammy'], ['grace', 'Gracie'], ['lisa', 'Lisa'], ['steve', 'Steve'], ['marshall', 'Marshall']];
 const panels = [...people, ['ideas', '💡 Ideas']];

@@ -56,6 +56,20 @@
         },
         "$other": {
           ".validate": false
+        },
+        "reactions": {
+          "$reactor": {
+            ".validate": "($reactor === 'sam' || $reactor === 'grace' || $reactor === 'lisa' || $reactor === 'steve' || $reactor === 'marshall') && newData.hasChildren(['text', 'photoUpdatedAt'])",
+            "text": {
+              ".validate": "newData.isString() && newData.val().length <= 32 && !newData.val().matches(/^[ \\t\\r\\n]*$/)"
+            },
+            "photoUpdatedAt": {
+              ".validate": "newData.isNumber() && newData.val() === newData.parent().parent().parent().child('updatedAt').val()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
         }
       }
     }

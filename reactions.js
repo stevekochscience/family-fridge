@@ -2,12 +2,13 @@ const emojis = [['heart', '❤️', 'Love'], ['laugh', '😂', 'Laugh'], ['like'
 
 const reactionText = value => typeof value === 'string' ? emojis.find(([key]) => key === value)?.[1] || '' : value?.text || '';
 
-export function createReactions({ people, backend, getState }) {
+export function createReactions({ people, backend, getState, dialogId = 'reaction-title', onPendingChange = () => {} }) {
   const cards = new Map(), pending = new Set();
   let generation = 0, viewing = null;
   const dialog = document.createElement('dialog'); dialog.className = 'reaction-dialog';
-  dialog.setAttribute('aria-labelledby', 'reaction-title');
+  dialog.setAttribute('aria-labelledby', dialogId);
   dialog.innerHTML = '<h2 id="reaction-title"></h2><p class="reaction-names"></p><form method="dialog"><button>Close</button></form>';
+  dialog.querySelector('h2').id = dialogId;
   document.body.append(dialog);
   dialog.addEventListener('click', event => { if (event.target === dialog) { const box = dialog.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close(); } });
   dialog.addEventListener('close', () => { viewing = null; });
@@ -34,14 +35,14 @@ export function createReactions({ people, backend, getState }) {
         const slot = `${id}/${note.id}/${person}`, status = area.querySelector('.reaction-status');
         if (pending.has(slot)) return;
         if (!state.connected) { status.textContent = 'Reconnect to react.'; return; }
-        pending.add(slot); status.textContent = 'Saving reaction…'; render();
+        pending.add(slot); onPendingChange(); status.textContent = 'Saving reaction…'; render();
         const stillHere = () => epoch === generation && getState().notes[id]?.id === note.id;
         const slow = setTimeout(() => { if (stillHere() && pending.has(slot)) status.textContent = 'Still saving. Keep this page open.'; }, 8000);
         try {
           await backend.saveReaction(id, note.id, person, value);
           if (stillHere()) { status.textContent = value ? 'Reaction saved ✓' : 'Reaction removed'; area.querySelector('details').open = false; }
         } catch { if (stillHere()) status.textContent = 'Couldn’t save reaction. Try again.'; }
-        finally { clearTimeout(slow); if (epoch === generation) { pending.delete(slot); render(); } }
+        finally { clearTimeout(slow); if (epoch === generation) { pending.delete(slot); render(); onPendingChange(); } }
     }
     area.querySelector('.custom-reaction').addEventListener('submit', event => { event.preventDefault(); const text = area.querySelector('input').value.trim(); if (text && text.length <= 32) save({ text }); });
     area.querySelector('.remove-reaction').addEventListener('click', () => save(null));
